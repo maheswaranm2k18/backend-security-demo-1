@@ -20,10 +20,29 @@ import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 import com.example.demo.constant.FileConstant;
 
 import io.swagger.v3.oas.annotations.OpenAPIDefinition;
+import io.swagger.v3.oas.annotations.enums.SecuritySchemeIn;
+import io.swagger.v3.oas.annotations.enums.SecuritySchemeType;
 import io.swagger.v3.oas.annotations.info.Info;
+import io.swagger.v3.oas.annotations.security.SecurityRequirement;
+import io.swagger.v3.oas.annotations.security.SecurityScheme;
+import io.swagger.v3.oas.annotations.security.SecuritySchemes;
+import io.swagger.v3.oas.models.Components;
+import io.swagger.v3.oas.models.OpenAPI;
+import io.swagger.v3.oas.annotations.security.SecurityScheme;
 
 @SpringBootApplication
-@OpenAPIDefinition(info = @Info(title = "Employees API", version = "2.0", description = "Employees Information"))
+//@SecurityScheme(type = SecuritySchemeType.APIKEY, name = "api_key", in = SecuritySchemeIn.HEADER)
+@OpenAPIDefinition(info = @Info(title = "Employees API", version = "2.0", description = "Employees Information"),
+security = @SecurityRequirement(name = "bearer-jwt", scopes = {"read", "write"}))
+@SecuritySchemes({
+    @SecurityScheme(
+        name = "bearer-jwt",
+        scheme = "bearer",
+        type = SecuritySchemeType.HTTP,
+        bearerFormat = "JWT",
+        in = SecuritySchemeIn.HEADER
+    )
+})
 public class SpringJwtSecurityDemo2Application {
 
 	public static void main(String[] args) {
@@ -86,6 +105,17 @@ public class SpringJwtSecurityDemo2Application {
 		}
 	  
 //	  @Bean
+//	  public OpenAPI customOpenAPI() {
+//	    return new OpenAPI()
+//	            .components(new Components().addSecuritySchemes("bearer-jwt",
+//	                new SecurityScheme().type(SecurityScheme.Type.HTTP).scheme("bearer").bearerFormat("JWT")
+//	                    .in(SecurityScheme.In.HEADER).name("Authorization")))
+//	            .info(new Info().title("App API").version("snapshot"))
+//	            .addSecurityItem(
+//	                    new SecurityRequirement().addList("bearer-jwt", Arrays.asList("read", "write")));
+//	  }
+	  
+//	  @Bean
 //    public Docket api() {
 //        return new Docket(DocumentationType.SWAGGER_2)
 //                .select()
@@ -102,4 +132,5 @@ public class SpringJwtSecurityDemo2Application {
 //                .version("1.0.0")
 //                .build();
 //    }
+	  
 }

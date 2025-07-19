@@ -4,6 +4,10 @@ import com.auth0.jwt.exceptions.TokenExpiredException;
 import com.example.demo.domain.HttpResponse;
 import com.example.demo.exception.domain.*;
 
+import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.Schema;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import jakarta.persistence.NoResultException;
 
 import org.slf4j.Logger;
@@ -11,6 +15,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.boot.web.servlet.error.ErrorController;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.authentication.BadCredentialsException;
@@ -20,6 +25,7 @@ import org.springframework.web.HttpRequestMethodNotSupportedException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
+import org.springframework.web.HttpMediaTypeNotAcceptableException;
 import org.springframework.web.servlet.NoHandlerFoundException;
 
 import java.io.IOException;
@@ -38,6 +44,11 @@ public class ExceptionHandling implements ErrorController {
     private static final String ERROR_PROCESSING_FILE = "Error occurred while processing file";
     private static final String NOT_ENOUGH_PERMISSION = "You do not have enough permission";
     public static final String ERROR_PATH = "/error";
+    
+    @ExceptionHandler(HttpMediaTypeNotAcceptableException.class)
+    public ResponseEntity<String> handleHttpMediaTypeNotAcceptableException(HttpMediaTypeNotAcceptableException ex) {
+        return ResponseEntity.status(HttpStatus.NOT_ACCEPTABLE).body("Not Acceptable");
+    }
 
     @ExceptionHandler(DisabledException.class)
     public ResponseEntity<HttpResponse> accountDisabledException() {
@@ -125,6 +136,14 @@ public class ExceptionHandling implements ErrorController {
     }
 
     @RequestMapping(ERROR_PATH)
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Successfully retrieved image", content = @Content(schema = @Schema(implementation = HttpResponse.class))),
+            @ApiResponse(responseCode = "404", description = "No image found", content = @Content(schema = @Schema(implementation = HttpResponse.class))),
+            @ApiResponse(responseCode = "406", description = "Not Acceptable", content = @Content(schema = @Schema(implementation = HttpResponse.class))),
+            @ApiResponse(responseCode = "500", description = "Unexpected error", content = @Content(schema = @Schema(implementation = HttpResponse.class))),
+            @ApiResponse(responseCode = "429", description = "Too many requests", content = @Content(schema = @Schema(implementation = HttpResponse.class))),
+            @ApiResponse(responseCode = "default", description = "Unexpected error", content = @Content(schema = @Schema(implementation = HttpResponse.class)))
+    })
     public ResponseEntity<HttpResponse> notFound404() {
         return createHttpResponse(NOT_FOUND, "There is no mapping for this URL");
     }
